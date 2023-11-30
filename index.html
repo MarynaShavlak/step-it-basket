@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="cart">
-                <button type="button" class="basket-btn">Кошик</button>
+                <button type="button" class="basket-btn" data-modal-open> <i class="fa-solid fa-cart-shopping"></i> Кошик</button>
                 <div class="cart-info">
                     <p class="goods-in-cart">Товарів в кошику: <span>0</span></p>
                     <p class="total-price">Сума: <span>0</span> uah</p>
@@ -19,7 +20,17 @@
         </div>
         <div class="goods"></div>
     </div>
-
-    <script src="script.js"></script>
+    <div class="backdrop backdrop--hidden" data-modal>
+        <div class="modal" >
+          <p class="modal__title">Корзина товарів</p>
+  
+          
+          <button type="button" class="modal__btn-close" data-modal-close>
+            <i class="fa-solid fa-xmark close-modal"></i>
+          </button>
+        </div>
+      </div>
+      <script src="modal.js" type="module"></script>
+      <script src="script.js" type="module"></script>
 </body>
 </html>
