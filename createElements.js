@@ -40,10 +40,18 @@ export function createTotalCostElement(price, quantity) {
   return totalCostElement;
 };
 
-export function createButton(html, onClick) {
+export function createControlQuantityBtn(html, onClick) {
   const button = document.createElement('button');
   button.className = 'quantity-btn';
   button.innerHTML = html;
+  button.addEventListener('click', onClick);
+  return button;
+};
+
+export function createDeleteProductBtn(onClick) {
+  const button = document.createElement('button');
+  button.className = 'delete-btn';
+  button.innerHTML = '<i class="fa-solid fa-xmark"></i>';
   button.addEventListener('click', onClick);
   return button;
 };

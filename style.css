@@ -187,6 +187,7 @@ ________________________
 }
 
 .cart-item {
+    position: relative;
   display: flex;
   padding-bottom: 20px;
   border-bottom: 1px solid black;
@@ -205,7 +206,7 @@ ________________________
 }
 
 .cart-quantity-wrap {
-    width: 100px;
+  width: 100px;
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -242,15 +243,37 @@ ________________________
 }
 
 .cart-title-img {
-     width: 80px;
+  width: 80px;
 }
 
 .cart-total-quantity {
-     width: 100px;
-     text-align: center;
+  width: 100px;
+
 }
 
 .cart-price {
-     width: 80px;
+  width: 80px;
 }
 
+.delete-btn {
+position:absolute;
+top:-20px;
+right:0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 50%;;
+  width: 20px;
+  height: 20px;
+  padding: 10px;
+  font-size: 14px;
+  background-color: rgba(117, 117, 117);
+  color: black;
+
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.delete-btn:hover {
+  color: gold;
+}

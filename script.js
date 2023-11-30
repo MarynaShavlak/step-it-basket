@@ -5,8 +5,9 @@ import {
   createPriceElement,
   createQuantityElement,
   createTotalCostElement,
-  createButton,
-  createHeaderElement,
+  createControlQuantityBtn,
+  createDeleteProductBtn,
+  createHeaderElement
 } from './createElements.js';
 
 class Product {
@@ -96,6 +97,28 @@ class Cart {
     this.updateCartDisplay();
   }
 
+  deleteFromCart(good) {
+    const id = good.id;
+    const indexToRemove = this.goodsInCart.findIndex(item => item.id === id);
+    if (indexToRemove !== -1) {
+      this.goodsInCart.splice(indexToRemove, 1);
+      this.totalPrice -= good.price;
+      this.updateCartDisplay();
+    }
+  }
+
+  deleteAllTheSameFromCart(good) {
+    const id = good.id;
+    const oldLength = this.goodsInCart.length;
+    const updatedArr = this.goodsInCart.filter(item => item.id !== good.id);
+    const newLength = updatedArr.length;
+    const deletedItemsQuantity  = oldLength - newLength;
+    this.goodsInCart = updatedArr;
+    this.totalPrice -= deletedItemsQuantity*good.price;
+    this.updateCartDisplay();
+  }
+
+
   updateCartDisplay() {
     const cartElement = document.querySelector('.cart');
     cartElement.querySelector('.goods-in-cart span').innerHTML =
@@ -137,18 +160,15 @@ class CartDisplay {
       }
     });
 
-  
-
     productMap.forEach(product => {
-        const existingCartItem = this.findCartItemById(product.id);
-        console.log('existingCartItem: ', existingCartItem);
-        if (existingCartItem) {
-          existingCartItem.updateQuantity(product.quantity);
-          cartItems.push(existingCartItem);
-        } else {
-          cartItems.push(new CartItem(product, this));
-        }
-      });
+      const existingCartItem = this.findCartItemById(product.id);
+      if (existingCartItem) {
+        existingCartItem.updateQuantity(product.quantity);
+        cartItems.push(existingCartItem);
+      } else {
+        cartItems.push(new CartItem(product, this));
+      }
+    });
 
     return cartItems;
   }
@@ -157,10 +177,20 @@ class CartDisplay {
     return this.cartItems.find(cartItem => cartItem.id === id);
   }
 
-
   updateCartItems(products) {
     this.cartItems = this.createCartItems(products);
     this.render();
+  }
+
+  reset() {
+    const cartContainer = document.querySelector('.cart-display');
+    const headerElement = cartContainer.querySelector('.cart-item-header');
+    cartContainer.innerHTML = '';
+    if (!headerElement) {
+      const newHeaderElement = createHeaderElement();
+      cartContainer.appendChild(newHeaderElement);
+    }
+    //   this.cartItemsElement = cartContainer;
   }
 
   render() {
@@ -177,27 +207,26 @@ class CartDisplay {
     });
   }
 
+  //   updateCartTotals() {
+  //     const totalQuantityElement = this.cartItemsElement.querySelector(
+  //       '.total-quantity span',
+  //     );
+  //     const totalPriceElement = this.cartItemsElement.querySelector(
+  //       '.total-price span',
+  //     );
 
-//   updateCartTotals() {
-//     const totalQuantityElement = this.cartItemsElement.querySelector(
-//       '.total-quantity span',
-//     );
-//     const totalPriceElement = this.cartItemsElement.querySelector(
-//       '.total-price span',
-//     );
+  //     const totalQuantity = this.cartItems.reduce(
+  //       (total, cartItem) => total + cartItem.product.quantity,
+  //       0,
+  //     );
+  //     const totalPrice = this.cartItems.reduce(
+  //       (total, cartItem) => total + cartItem.product.price * cartItem.product.quantity,
+  //       0,
+  //     );
 
-//     const totalQuantity = this.cartItems.reduce(
-//       (total, cartItem) => total + cartItem.product.quantity,
-//       0,
-//     );
-//     const totalPrice = this.cartItems.reduce(
-//       (total, cartItem) => total + cartItem.product.price * cartItem.product.quantity,
-//       0,
-//     );
-
-//     totalQuantityElement.textContent = totalQuantity;
-//     totalPriceElement.textContent = totalPrice;
-//   }
+  //     totalQuantityElement.textContent = totalQuantity;
+  //     totalPriceElement.textContent = totalPrice;
+  //   }
 }
 
 class CartItem {
@@ -205,12 +234,10 @@ class CartItem {
     this.product = product;
     this.cartDisplay = cartDisplay;
     this.id = product.id;
-}
-
+  }
 
   render() {
     const { id, title, image, price, quantity } = this.product;
-    console.log('this.product: ', this.product);
 
     const cartItemElement = createCartItemElement(id);
     const imgElement = createImageElement(image);
@@ -219,12 +246,16 @@ class CartItem {
     const quantityElement = createQuantityElement(quantity);
     const totalCostElement = createTotalCostElement(price, quantity);
     const quantityWrap = this.createQuantityWrapElement(quantityElement);
+    const deleteBtn = createDeleteProductBtn(()=> {
+        this.updateQuantity(0);
+    });
 
     cartItemElement.appendChild(imgElement);
     cartItemElement.appendChild(titleElement);
     cartItemElement.appendChild(priceElement);
     cartItemElement.appendChild(quantityWrap);
     cartItemElement.appendChild(totalCostElement);
+    cartItemElement.appendChild(deleteBtn);
 
     return cartItemElement;
   }
@@ -233,38 +264,59 @@ class CartItem {
     const quantityWrap = document.createElement('div');
     quantityWrap.className = 'cart-quantity-wrap';
     quantityWrap.appendChild(
-      createButton('<i class="fa-solid fa-minus"></i>', () => {
-        console.log('click');
+      createControlQuantityBtn('<i class="fa-solid fa-minus"></i>', () => {
         this.updateQuantity(-1);
       }),
     );
     quantityWrap.appendChild(quantityElement);
     quantityWrap.appendChild(
-      createButton('<i class="fa-solid fa-plus"></i>', () =>
+      createControlQuantityBtn('<i class="fa-solid fa-plus"></i>', () =>
         this.updateQuantity(1),
       ),
     );
     return quantityWrap;
   }
 
-//   updateQuantity(amount) {
-//     this.product.quantity += amount;
-//     this.render();
-//     console.log('store BEFORE', store);
-//   }
-updateQuantity(amount) {
-    const oldQuantity = this.product.quantity;
-    const newQuantity = Math.max(1, oldQuantity + amount);
+  //   updateQuantity(amount) {
+  //     this.product.quantity += amount;
+  //     this.render();
+  //     console.log('store BEFORE', store);
+  //   }
+  updateQuantity(amount) {
+    if (this.product.quantity === 0) return;
+    this.product.quantity += amount;
 
-    if (newQuantity !== oldQuantity) {
-      const quantityElement = this.cartDisplay.cartItemsElement.querySelector(
-        `.cart-item[data-id="${this.id}"] .cart-quantity`,
-      );
-
-      this.product.quantity = newQuantity;
-      quantityElement.textContent = `${newQuantity}`;
-    //   this.cartDisplay.updateCartTotals();
+    const good = {
+      id: this.product.id,
+      title: this.product.title,
+      image: this.product.image,
+      price: this.product.price,
+    };
+    const isMinus = amount == -1;
+    if (amount == -1) {
+      store.cart.deleteFromCart(good);
+    } else if (amount == 1) {
+      store.cart.addToCart(good);
+    } else if (amount == 0) {
+        store.cart.deleteAllTheSameFromCart(good);
     }
+
+    const list = store.cart.goodsInCart;
+    console.log('list : ', list);
+    modal.cartDisplay.reset();
+    modal.cartDisplay.render();
+    //   this.render();
+    // const oldQuantity = this.product.quantity;
+    // const newQuantity = Math.max(1, oldQuantity + amount);
+
+    // if (newQuantity !== oldQuantity) {
+    //   const quantityElement = this.cartDisplay.cartItemsElement.querySelector(
+    //     `.cart-item[data-id="${this.id}"] .cart-quantity`,
+    //   );
+
+    //   this.product.quantity = newQuantity;
+    //   quantityElement.textContent = `${newQuantity}`;
+    //   this.cartDisplay.updateCartTotals();
   }
 }
 
