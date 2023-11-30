@@ -108,7 +108,6 @@ class Cart {
   }
 
   deleteAllTheSameFromCart(good) {
-    const id = good.id;
     const oldLength = this.goodsInCart.length;
     const updatedArr = this.goodsInCart.filter(item => item.id !== good.id);
     const newLength = updatedArr.length;
@@ -126,22 +125,14 @@ class Cart {
   }
 }
 
-class Store {
-  constructor() {
-    this.goodList = new ProductList();
-    this.cart = new Cart();
-  }
-
-  render() {
-    this.goodList.render();
-  }
-}
 
 class CartDisplay {
   constructor() {
     this.cartItems = [];
     this.render();
   }
+
+
 
   createCartItems(products) {
     console.log('products: ', products);
@@ -278,6 +269,7 @@ class CartItem {
       store.cart.deleteAllTheSameFromCart(good);
       modal.cartDisplay.updateCartItems(store.cart.goodsInCart);
     }
+    console.log('IN UPDATE.cart.goodsInCart: ', store.cart.goodsInCart);
 
     modal.cartDisplay.reset();
     modal.cartDisplay.render();
@@ -322,8 +314,17 @@ class Modal {
 }
 
 
-
-
+class Store {
+    constructor() {
+      this.goodList = new ProductList();
+      this.cart = new Cart();
+    }
+  
+    render() {
+      this.goodList.render();
+    }
+  }
+  
 const store = new Store();
 const modal = new Modal(store.cart);
 store.render();
