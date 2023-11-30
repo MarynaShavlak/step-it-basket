@@ -7,7 +7,7 @@ import {
   createTotalCostElement,
   createControlQuantityBtn,
   createDeleteProductBtn,
-  createHeaderElement
+  createHeaderElement,
 } from './createElements.js';
 
 class Product {
@@ -112,12 +112,11 @@ class Cart {
     const oldLength = this.goodsInCart.length;
     const updatedArr = this.goodsInCart.filter(item => item.id !== good.id);
     const newLength = updatedArr.length;
-    const deletedItemsQuantity  = oldLength - newLength;
+    const deletedItemsQuantity = oldLength - newLength;
     this.goodsInCart = updatedArr;
-    this.totalPrice -= deletedItemsQuantity*good.price;
+    this.totalPrice -= deletedItemsQuantity * good.price;
     this.updateCartDisplay();
   }
-
 
   updateCartDisplay() {
     const cartElement = document.querySelector('.cart');
@@ -169,6 +168,7 @@ class CartDisplay {
         cartItems.push(new CartItem(product, this));
       }
     });
+    console.log('cartItems : ', cartItems);
 
     return cartItems;
   }
@@ -190,7 +190,6 @@ class CartDisplay {
       const newHeaderElement = createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
-    //   this.cartItemsElement = cartContainer;
   }
 
   render() {
@@ -201,32 +200,14 @@ class CartDisplay {
       cartContainer.appendChild(newHeaderElement);
     }
     this.cartItemsElement = cartContainer;
+    console.log('CARDDISPALY RENDER this.cartItems: ', this.cartItems);
     this.cartItems.forEach(cartItem => {
-      const cartItemElement = cartItem.render();
-      cartContainer.appendChild(cartItemElement);
+      if (cartItem.product.quantity) {
+        const cartItemElement = cartItem.render();
+        cartContainer.appendChild(cartItemElement);
+      }
     });
   }
-
-  //   updateCartTotals() {
-  //     const totalQuantityElement = this.cartItemsElement.querySelector(
-  //       '.total-quantity span',
-  //     );
-  //     const totalPriceElement = this.cartItemsElement.querySelector(
-  //       '.total-price span',
-  //     );
-
-  //     const totalQuantity = this.cartItems.reduce(
-  //       (total, cartItem) => total + cartItem.product.quantity,
-  //       0,
-  //     );
-  //     const totalPrice = this.cartItems.reduce(
-  //       (total, cartItem) => total + cartItem.product.price * cartItem.product.quantity,
-  //       0,
-  //     );
-
-  //     totalQuantityElement.textContent = totalQuantity;
-  //     totalPriceElement.textContent = totalPrice;
-  //   }
 }
 
 class CartItem {
@@ -246,8 +227,8 @@ class CartItem {
     const quantityElement = createQuantityElement(quantity);
     const totalCostElement = createTotalCostElement(price, quantity);
     const quantityWrap = this.createQuantityWrapElement(quantityElement);
-    const deleteBtn = createDeleteProductBtn(()=> {
-        this.updateQuantity(0);
+    const deleteBtn = createDeleteProductBtn(() => {
+      this.updateQuantity(0);
     });
 
     cartItemElement.appendChild(imgElement);
@@ -277,46 +258,29 @@ class CartItem {
     return quantityWrap;
   }
 
-  //   updateQuantity(amount) {
-  //     this.product.quantity += amount;
-  //     this.render();
-  //     console.log('store BEFORE', store);
-  //   }
   updateQuantity(amount) {
-    if (this.product.quantity === 0) return;
-    this.product.quantity += amount;
-
     const good = {
       id: this.product.id,
       title: this.product.title,
       image: this.product.image,
       price: this.product.price,
     };
-    const isMinus = amount == -1;
+    if (this.product.quantity === 0) return;
+
     if (amount == -1) {
+      this.product.quantity += amount;
       store.cart.deleteFromCart(good);
     } else if (amount == 1) {
+      this.product.quantity += amount;
       store.cart.addToCart(good);
     } else if (amount == 0) {
-        store.cart.deleteAllTheSameFromCart(good);
+      this.product.quantity += amount;
+      store.cart.deleteAllTheSameFromCart(good);
+      modal.cartDisplay.updateCartItems(store.cart.goodsInCart);
     }
 
-    const list = store.cart.goodsInCart;
-    console.log('list : ', list);
     modal.cartDisplay.reset();
     modal.cartDisplay.render();
-    //   this.render();
-    // const oldQuantity = this.product.quantity;
-    // const newQuantity = Math.max(1, oldQuantity + amount);
-
-    // if (newQuantity !== oldQuantity) {
-    //   const quantityElement = this.cartDisplay.cartItemsElement.querySelector(
-    //     `.cart-item[data-id="${this.id}"] .cart-quantity`,
-    //   );
-
-    //   this.product.quantity = newQuantity;
-    //   quantityElement.textContent = `${newQuantity}`;
-    //   this.cartDisplay.updateCartTotals();
   }
 }
 
@@ -339,13 +303,13 @@ class Modal {
 
     this.cartDisplay = new CartDisplay();
     this.cartDisplay.render();
-    // this.cartDisplay.updateCartItems(this.cart.goodsInCart);
-    // this.cartDisplay.updateCartTotals(); // Add this line to initialize totals
+    
   }
 
   toggleModal() {
     document.body.classList.toggle('modal-open');
     this.refs.modal.classList.toggle('backdrop--hidden');
+    console.log('this.cart.goodsInCart: ', this.cart.goodsInCart);
     this.cartDisplay.updateCartItems(this.cart.goodsInCart);
   }
 
@@ -356,6 +320,9 @@ class Modal {
     }
   }
 }
+
+
+
 
 const store = new Store();
 const modal = new Modal(store.cart);
