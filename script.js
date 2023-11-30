@@ -137,12 +137,26 @@ class CartDisplay {
       }
     });
 
+  
+
     productMap.forEach(product => {
-      cartItems.push(new CartItem(product, this));
-    });
+        const existingCartItem = this.findCartItemById(product.id);
+        console.log('existingCartItem: ', existingCartItem);
+        if (existingCartItem) {
+          existingCartItem.updateQuantity(product.quantity);
+          cartItems.push(existingCartItem);
+        } else {
+          cartItems.push(new CartItem(product, this));
+        }
+      });
 
     return cartItems;
   }
+
+  findCartItemById(id) {
+    return this.cartItems.find(cartItem => cartItem.id === id);
+  }
+
 
   updateCartItems(products) {
     this.cartItems = this.createCartItems(products);
@@ -156,12 +170,34 @@ class CartDisplay {
       const newHeaderElement = createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
-
+    this.cartItemsElement = cartContainer;
     this.cartItems.forEach(cartItem => {
       const cartItemElement = cartItem.render();
       cartContainer.appendChild(cartItemElement);
     });
   }
+
+
+//   updateCartTotals() {
+//     const totalQuantityElement = this.cartItemsElement.querySelector(
+//       '.total-quantity span',
+//     );
+//     const totalPriceElement = this.cartItemsElement.querySelector(
+//       '.total-price span',
+//     );
+
+//     const totalQuantity = this.cartItems.reduce(
+//       (total, cartItem) => total + cartItem.product.quantity,
+//       0,
+//     );
+//     const totalPrice = this.cartItems.reduce(
+//       (total, cartItem) => total + cartItem.product.price * cartItem.product.quantity,
+//       0,
+//     );
+
+//     totalQuantityElement.textContent = totalQuantity;
+//     totalPriceElement.textContent = totalPrice;
+//   }
 }
 
 class CartItem {
@@ -211,12 +247,24 @@ class CartItem {
     return quantityWrap;
   }
 
-  updateQuantity(amount) {
-    this.product.quantity += amount;
-    this.render();
-    console.log(store);
-    store.cart.addToCart(this.product);
-    this.cartDisplay.updateCartItems(store.cart.goodsInCart);
+//   updateQuantity(amount) {
+//     this.product.quantity += amount;
+//     this.render();
+//     console.log('store BEFORE', store);
+//   }
+updateQuantity(amount) {
+    const oldQuantity = this.product.quantity;
+    const newQuantity = Math.max(1, oldQuantity + amount);
+
+    if (newQuantity !== oldQuantity) {
+      const quantityElement = this.cartDisplay.cartItemsElement.querySelector(
+        `.cart-item[data-id="${this.id}"] .cart-quantity`,
+      );
+
+      this.product.quantity = newQuantity;
+      quantityElement.textContent = `${newQuantity}`;
+    //   this.cartDisplay.updateCartTotals();
+    }
   }
 }
 
@@ -239,6 +287,8 @@ class Modal {
 
     this.cartDisplay = new CartDisplay();
     this.cartDisplay.render();
+    // this.cartDisplay.updateCartItems(this.cart.goodsInCart);
+    // this.cartDisplay.updateCartTotals(); // Add this line to initialize totals
   }
 
   toggleModal() {
