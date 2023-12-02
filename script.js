@@ -1,14 +1,14 @@
-import {
-  createCartItemElement,
-  createImageElement,
-  createTitleElement,
-  createPriceElement,
-  createQuantityElement,
-  createTotalCostElement,
-  createControlQuantityBtn,
-  createDeleteProductBtn,
-  createHeaderElement,
-} from './createElements.js';
+// import {
+//   createCartItemElement,
+//   createImageElement,
+//   createTitleElement,
+//   createPriceElement,
+//   createQuantityElement,
+//   createTotalCostElement,
+//   createControlQuantityBtn,
+//   createDeleteProductBtn,
+//   createHeaderElement,
+// } from './createElements.js';
 
 class Product {
   static category = 'Movies';
@@ -159,6 +159,39 @@ class CartModalList {
     return cartItems;
   }
 
+  createHeaderElement() {
+    const headerElement = document.createElement('div');
+    headerElement.className = 'cart-item cart-item-header';
+
+    const itemHeader = document.createElement('div');
+    itemHeader.textContent = 'Фото';
+    itemHeader.className = 'cart-title-img';
+    headerElement.appendChild(itemHeader);
+
+    const titleHeader = document.createElement('h4');
+    titleHeader.className = 'cart-title';
+    titleHeader.textContent = 'Назва';
+    titleHeader.className = 'cart-title';
+    headerElement.appendChild(titleHeader);
+
+    const priceHeader = document.createElement('div');
+    priceHeader.textContent = 'Ціна';
+    priceHeader.className = 'cart-price';
+    headerElement.appendChild(priceHeader);
+
+    const quantityHeader = document.createElement('div');
+    quantityHeader.textContent = 'Кількість';
+    quantityHeader.className = 'cart-quantity-wrap';
+    headerElement.appendChild(quantityHeader);
+
+    const totalCostHeader = document.createElement('div');
+    totalCostHeader.textContent = 'Загальна вартість';
+    totalCostHeader.className = 'cart-total-quantity';
+    headerElement.appendChild(totalCostHeader);
+
+    return headerElement;
+  }
+
   findCartItemById(id) {
     return this.cartItems.find(cartItem => cartItem.id === id);
   }
@@ -172,7 +205,7 @@ class CartModalList {
   reset() {
     const cartContainer = document.querySelector('.cart-display');
     cartContainer.innerHTML = '';
-  if (!store.cart.goodsInCart.length) {
+    if (!store.cart.goodsInCart.length) {
       const emptyEl = document.createElement('p');
       emptyEl.className = 'empty-cart';
       emptyEl.textContent = 'У корзину ще не додано жодного товару';
@@ -184,17 +217,9 @@ class CartModalList {
   render() {
     const cartContainer = document.querySelector('.cart-display');
     const headerElement = cartContainer.querySelector('.cart-item-header');
-    // if (!store.cart.goodsInCart.length) {
-    //   const emptyEl = document.createElement('p');
-    //   emptyEl.className = 'empty-cart';
-    //   emptyEl.textContent = 'У корзину ще не додано жодного товару';
-    //   cartContainer.appendChild(emptyEl);
-    //   return;
-    // }
 
-    if (!headerElement && store.cart.goodsInCart.length ) {
-        
-      const newHeaderElement = createHeaderElement();
+    if (!headerElement && store.cart.goodsInCart.length) {
+      const newHeaderElement = this.createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
     this.cartItems.forEach(cartItem => {
@@ -213,17 +238,136 @@ class CartModalItem {
     this.id = product.id;
   }
 
+  createCartItemElement(id) {
+    const cartItemElement = document.createElement('div');
+    cartItemElement.className = 'cart-item';
+    cartItemElement.setAttribute('data-id', id);
+    return cartItemElement;
+  }
+
+  createImageElement(image) {
+    const imgElement = document.createElement('img');
+    imgElement.className = 'cart-image';
+    imgElement.src = image;
+    return imgElement;
+  }
+
+  createTitleElement(title) {
+    const titleElement = document.createElement('h4');
+    titleElement.className = 'cart-title';
+    titleElement.textContent = title;
+    return titleElement;
+  }
+
+  createPriceElement(price) {
+    const priceElement = document.createElement('p');
+    priceElement.className = 'cart-price';
+    priceElement.textContent = `₴${price}.00`;
+    return priceElement;
+  }
+
+  createQuantityElement(quantity) {
+    const quantityElement = document.createElement('p');
+    quantityElement.className = 'cart-quantity';
+    quantityElement.textContent = `${quantity}`;
+    return quantityElement;
+  }
+
+  createTotalCostElement(price, quantity) {
+    const totalCostElement = document.createElement('p');
+    totalCostElement.className = 'cart-total-quantity';
+    totalCostElement.textContent = `₴${price * quantity}.00`;
+    return totalCostElement;
+  }
+
+  createControlQuantityBtn(html, onClick) {
+    const button = document.createElement('button');
+    button.className = 'quantity-btn';
+    button.innerHTML = html;
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  createDeleteProductBtn(onClick) {
+    const button = document.createElement('button');
+    button.className = 'delete-btn';
+    button.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  createQuantityWrapElement(quantityElement) {
+    const quantityWrap = document.createElement('div');
+    quantityWrap.className = 'cart-quantity-wrap';
+    quantityWrap.appendChild(
+      this.createControlQuantityBtn('<i class="fa-solid fa-minus"></i>', () => {
+        this.updateQuantity(-1);
+      }),
+    );
+    quantityWrap.appendChild(quantityElement);
+    quantityWrap.appendChild(
+        this.createControlQuantityBtn('<i class="fa-solid fa-plus"></i>', () =>
+        this.updateQuantity(1),
+      ),
+    );
+    return quantityWrap;
+  }
+
+  handleCartUpdates(amount, el, good) {
+    if (amount === -1 && this.product.quantity === 1) {
+      store.cart.deleteAllTheSameFromCart(good);
+      el.parentNode.removeChild(el);
+    } else if (amount === -1) {
+      store.cart.deleteFromCart(good);
+    } else if (amount === 1) {
+      store.cart.addToCart(good);
+    } else if (amount === 0) {
+      store.cart.deleteAllTheSameFromCart(good);
+      el.parentNode.removeChild(el);
+    }
+  }
+
+  updateItemInterface(el) {
+    const quantityElement = el.querySelector(`.cart-quantity`);
+    const totalCostElement = el.querySelector(`.cart-total-quantity`);
+    if (quantityElement) {
+      quantityElement.textContent = this.product.quantity;
+    }
+
+    if (totalCostElement) {
+      totalCostElement.textContent = `₴${
+        this.product.price * this.product.quantity
+      }`;
+    }
+  }
+
+  updateQuantity(amount) {
+    const el = document.querySelector(`[data-id="${this.id}"]`);
+    const good = {
+      id: this.product.id,
+      title: this.product.title,
+      image: this.product.image,
+      price: this.product.price,
+    };
+    this.handleCartUpdates(amount, el, good);
+    this.product.quantity += amount;
+    this.updateItemInterface(el);
+
+    if (!store.cart.goodsInCart.length) {
+      modal.cartDisplay.reset();
+    }
+  }
   render() {
     const { id, title, image, price, quantity } = this.product;
 
-    const cartItemElement = createCartItemElement(id);
-    const imgElement = createImageElement(image);
-    const titleElement = createTitleElement(title);
-    const priceElement = createPriceElement(price);
-    const quantityElement = createQuantityElement(quantity);
-    const totalCostElement = createTotalCostElement(price, quantity);
+    const cartItemElement = this.createCartItemElement(id);
+    const imgElement = this.createImageElement(image);
+    const titleElement = this.createTitleElement(title);
+    const priceElement = this.createPriceElement(price);
+    const quantityElement = this.createQuantityElement(quantity);
+    const totalCostElement = this.createTotalCostElement(price, quantity);
     const quantityWrap = this.createQuantityWrapElement(quantityElement);
-    const deleteBtn = createDeleteProductBtn(() => {
+    const deleteBtn = this.createDeleteProductBtn(() => {
       this.updateQuantity(0);
     });
 
@@ -236,64 +380,6 @@ class CartModalItem {
 
     return cartItemElement;
   }
-
-  createQuantityWrapElement(quantityElement) {
-    const quantityWrap = document.createElement('div');
-    quantityWrap.className = 'cart-quantity-wrap';
-    quantityWrap.appendChild(
-      createControlQuantityBtn('<i class="fa-solid fa-minus"></i>', () => {
-        this.updateQuantity(-1);
-      }),
-    );
-    quantityWrap.appendChild(quantityElement);
-    quantityWrap.appendChild(
-      createControlQuantityBtn('<i class="fa-solid fa-plus"></i>', () =>
-        this.updateQuantity(1),
-      ),
-    );
-    return quantityWrap;
-  }
-
-  updateQuantity(amount) {
-    const el = document.querySelector(`[data-id="${this.id}"]`);
-    const quantityElement = el.querySelector(`.cart-quantity`);
-    const totalCostElement = el.querySelector(`.cart-total-quantity`);
-
-    const good = {
-      id: this.product.id,
-      title: this.product.title,
-      image: this.product.image,
-      price: this.product.price,
-    };
-
-    if (amount == -1 && this.product.quantity == 1) {
-        store.cart.deleteAllTheSameFromCart(good);
-      el.parentNode.removeChild(el);
-    } else if (amount == -1) {
-      store.cart.deleteFromCart(good);
-    } else if (amount == 1) {
-      store.cart.addToCart(good);
-    } else if (amount == 0) {
-      store.cart.deleteAllTheSameFromCart(good);
-      el.parentNode.removeChild(el);
-    }
-
-    this.product.quantity += amount;
-    
-
-    if (quantityElement) {
-      quantityElement.textContent = this.product.quantity;
-    }
-
-    if (totalCostElement) {
-      totalCostElement.textContent = `₴${
-        this.product.price * this.product.quantity
-      }`;
-    }
-    if (!store.cart.goodsInCart.length) {
-    modal.cartDisplay.reset();
-    }
-     }
 }
 
 class Modal {
@@ -314,11 +400,9 @@ class Modal {
     this.refs.modal.addEventListener('click', e => this.handleModalClose(e));
 
     this.cartDisplay = new CartModalList();
-    
   }
 
   toggleModal() {
-   
     document.body.classList.toggle('modal-open');
     this.refs.modal.classList.toggle('backdrop--hidden');
     this.cartDisplay.reset();
@@ -334,9 +418,9 @@ class Modal {
 }
 
 class Store {
-  constructor() {
-    this.goodList = new ProductList();
-    this.cart = new CartTablo();
+  constructor(productList, cart) {
+    this.goodList = productList;
+    this.cart = cart;
   }
 
   render() {
@@ -344,6 +428,6 @@ class Store {
   }
 }
 
-const store = new Store();
+const store = new Store(new ProductList(), new CartTablo());
 store.render();
 const modal = new Modal(store.cart);
