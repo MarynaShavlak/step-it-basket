@@ -278,3 +278,16 @@ right:0;
 .delete-btn:hover {
   color: gold;
 }
+
+
+.empty-cart {
+    margin-bottom: 30px;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
+    color:dimgray;
+    font-style: italic;
+  }

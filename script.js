@@ -86,7 +86,7 @@ class ProductRenderer {
   }
 }
 
-class Cart {
+class CartTablo {
   constructor() {
     this.goodsInCart = [];
     this.totalPrice = 0;
@@ -125,7 +125,7 @@ class Cart {
   }
 }
 
-class CartDisplay {
+class CartModalList {
   constructor() {
     this.cartItems = [];
     this.render();
@@ -152,7 +152,7 @@ class CartDisplay {
         existingCartItem.updateQuantity(product.quantity);
         cartItems.push(existingCartItem);
       } else {
-        cartItems.push(new CartItem(product, this));
+        cartItems.push(new CartModalItem(product, this));
       }
     });
 
@@ -171,11 +171,13 @@ class CartDisplay {
 
   reset() {
     const cartContainer = document.querySelector('.cart-display');
-    const headerElement = cartContainer.querySelector('.cart-item-header');
     cartContainer.innerHTML = '';
-    if (!headerElement) {
-      const newHeaderElement = createHeaderElement();
-      cartContainer.appendChild(newHeaderElement);
+  if (!store.cart.goodsInCart.length) {
+      const emptyEl = document.createElement('p');
+      emptyEl.className = 'empty-cart';
+      emptyEl.textContent = 'У корзину ще не додано жодного товару';
+      cartContainer.appendChild(emptyEl);
+      return;
     }
   }
 
@@ -191,10 +193,10 @@ class CartDisplay {
     // }
 
     if (!headerElement && store.cart.goodsInCart.length ) {
+        
       const newHeaderElement = createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
-    // this.cartItemsElement = cartContainer;
     this.cartItems.forEach(cartItem => {
       if (cartItem.product.quantity) {
         const cartItemElement = cartItem.render();
@@ -204,7 +206,7 @@ class CartDisplay {
   }
 }
 
-class CartItem {
+class CartModalItem {
   constructor(product, cartDisplay) {
     this.product = product;
     this.cartDisplay = cartDisplay;
@@ -264,8 +266,6 @@ class CartItem {
       price: this.product.price,
     };
 
-    // if (this.product.quantity === 0) return;
-
     if (amount == -1 && this.product.quantity == 1) {
         store.cart.deleteAllTheSameFromCart(good);
       el.parentNode.removeChild(el);
@@ -290,7 +290,10 @@ class CartItem {
         this.product.price * this.product.quantity
       }`;
     }
-  }
+    if (!store.cart.goodsInCart.length) {
+    modal.cartDisplay.reset();
+    }
+     }
 }
 
 class Modal {
@@ -310,7 +313,7 @@ class Modal {
     this.refs.closeModalBtn.addEventListener('click', () => this.toggleModal());
     this.refs.modal.addEventListener('click', e => this.handleModalClose(e));
 
-    this.cartDisplay = new CartDisplay();
+    this.cartDisplay = new CartModalList();
     
   }
 
@@ -333,7 +336,7 @@ class Modal {
 class Store {
   constructor() {
     this.goodList = new ProductList();
-    this.cart = new Cart();
+    this.cart = new CartTablo();
   }
 
   render() {
