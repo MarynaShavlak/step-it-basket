@@ -118,6 +118,7 @@ class Cart {
   }
 
   updateCartDisplay() {
+    console.log('here update');
     const cartElement = document.querySelector('.cart');
     cartElement.querySelector('.goods-in-cart span').innerHTML =
       this.goodsInCart.length;
@@ -125,17 +126,13 @@ class Cart {
   }
 }
 
-
 class CartDisplay {
   constructor() {
     this.cartItems = [];
     this.render();
   }
 
-
-
   createCartItems(products) {
-    console.log('products: ', products);
     const cartItems = [];
     const productMap = new Map();
 
@@ -159,7 +156,6 @@ class CartDisplay {
         cartItems.push(new CartItem(product, this));
       }
     });
-    console.log('cartItems : ', cartItems);
 
     return cartItems;
   }
@@ -186,12 +182,20 @@ class CartDisplay {
   render() {
     const cartContainer = document.querySelector('.cart-display');
     const headerElement = cartContainer.querySelector('.cart-item-header');
-    if (!headerElement) {
+    // if (!store.cart.goodsInCart.length) {
+    //   const emptyEl = document.createElement('p');
+    //   emptyEl.className = 'empty-cart';
+    //   emptyEl.textContent = 'У корзину ще не додано жодного товару';
+    //   cartContainer.appendChild(emptyEl);
+    //   return;
+    // }
+
+    if (!headerElement && store.cart.goodsInCart.length ) {
       const newHeaderElement = createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
-    this.cartItemsElement = cartContainer;
-    console.log('CARDDISPALY RENDER this.cartItems: ', this.cartItems);
+    console.log('this.cartItems: ', this.cartItems);
+    // this.cartItemsElement = cartContainer;
     this.cartItems.forEach(cartItem => {
       if (cartItem.product.quantity) {
         const cartItemElement = cartItem.render();
@@ -250,29 +254,47 @@ class CartItem {
   }
 
   updateQuantity(amount) {
+    console.log('amount: ', amount);
+    console.log('this.product.quantity: ', this.product.quantity);
+    console.log('______');
+
+    const el = document.querySelector(`[data-id="${this.id}"]`);
+    const quantityElement = el.querySelector(`.cart-quantity`);
+    const totalCostElement = el.querySelector(`.cart-total-quantity`);
+
     const good = {
       id: this.product.id,
       title: this.product.title,
       image: this.product.image,
       price: this.product.price,
     };
-    if (this.product.quantity === 0) return;
 
-    if (amount == -1) {
-      this.product.quantity += amount;
+    // if (this.product.quantity === 0) return;
+
+    if (amount == -1 && this.product.quantity == 1) {
+        store.cart.deleteAllTheSameFromCart(good);
+      el.parentNode.removeChild(el);
+    } else if (amount == -1) {
       store.cart.deleteFromCart(good);
     } else if (amount == 1) {
-      this.product.quantity += amount;
       store.cart.addToCart(good);
     } else if (amount == 0) {
-      this.product.quantity += amount;
       store.cart.deleteAllTheSameFromCart(good);
-      modal.cartDisplay.updateCartItems(store.cart.goodsInCart);
+      el.parentNode.removeChild(el);
     }
-    console.log('IN UPDATE.cart.goodsInCart: ', store.cart.goodsInCart);
 
-    modal.cartDisplay.reset();
-    modal.cartDisplay.render();
+    this.product.quantity += amount;
+    
+
+    if (quantityElement) {
+      quantityElement.textContent = this.product.quantity;
+    }
+
+    if (totalCostElement) {
+      totalCostElement.textContent = `₴${
+        this.product.price * this.product.quantity
+      }`;
+    }
   }
 }
 
@@ -294,7 +316,6 @@ class Modal {
     this.refs.modal.addEventListener('click', e => this.handleModalClose(e));
 
     this.cartDisplay = new CartDisplay();
-    this.cartDisplay.render();
     
   }
 
@@ -302,6 +323,7 @@ class Modal {
     document.body.classList.toggle('modal-open');
     this.refs.modal.classList.toggle('backdrop--hidden');
     console.log('this.cart.goodsInCart: ', this.cart.goodsInCart);
+    // this.cartDisplay.render();
     this.cartDisplay.updateCartItems(this.cart.goodsInCart);
   }
 
@@ -313,18 +335,17 @@ class Modal {
   }
 }
 
-
 class Store {
-    constructor() {
-      this.goodList = new ProductList();
-      this.cart = new Cart();
-    }
-  
-    render() {
-      this.goodList.render();
-    }
+  constructor() {
+    this.goodList = new ProductList();
+    this.cart = new Cart();
   }
-  
+
+  render() {
+    this.goodList.render();
+  }
+}
+
 const store = new Store();
-const modal = new Modal(store.cart);
 store.render();
+const modal = new Modal(store.cart);
