@@ -118,7 +118,6 @@ class Cart {
   }
 
   updateCartDisplay() {
-    console.log('here update');
     const cartElement = document.querySelector('.cart');
     cartElement.querySelector('.goods-in-cart span').innerHTML =
       this.goodsInCart.length;
@@ -165,6 +164,7 @@ class CartDisplay {
   }
 
   updateCartItems(products) {
+    this.cartItems = [];
     this.cartItems = this.createCartItems(products);
     this.render();
   }
@@ -194,7 +194,6 @@ class CartDisplay {
       const newHeaderElement = createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
-    console.log('this.cartItems: ', this.cartItems);
     // this.cartItemsElement = cartContainer;
     this.cartItems.forEach(cartItem => {
       if (cartItem.product.quantity) {
@@ -254,10 +253,6 @@ class CartItem {
   }
 
   updateQuantity(amount) {
-    console.log('amount: ', amount);
-    console.log('this.product.quantity: ', this.product.quantity);
-    console.log('______');
-
     const el = document.querySelector(`[data-id="${this.id}"]`);
     const quantityElement = el.querySelector(`.cart-quantity`);
     const totalCostElement = el.querySelector(`.cart-total-quantity`);
@@ -320,10 +315,10 @@ class Modal {
   }
 
   toggleModal() {
+   
     document.body.classList.toggle('modal-open');
     this.refs.modal.classList.toggle('backdrop--hidden');
-    console.log('this.cart.goodsInCart: ', this.cart.goodsInCart);
-    // this.cartDisplay.render();
+    this.cartDisplay.reset();
     this.cartDisplay.updateCartItems(this.cart.goodsInCart);
   }
 
