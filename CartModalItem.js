@@ -104,6 +104,7 @@ class CartModalItem {
         this.product.price * this.product.quantity
       }`;
     }
+    this.cartDisplay.updateCartResults(store.cart.goodsInCart);
   }
 
   updateQuantity(amount) {

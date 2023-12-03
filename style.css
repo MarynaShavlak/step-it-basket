@@ -224,7 +224,7 @@ ________________________
 }
 
 
-.cart-quantity-wrap {
+.cart-quantity-wrap, .cart-quantity-wrap-footer {
   width: 100px;
   display: flex;
   align-items: baseline;
@@ -255,6 +255,7 @@ ________________________
 
 .cart-quantity,
 .cart-total-quantity,
+.cart-total-quantity-footer,
 .cart-price,
 .cart-title-img {
   font-size: 20px;
@@ -265,7 +266,8 @@ ________________________
   width: 80px;
 }
 
-.cart-total-quantity {
+.cart-total-quantity,
+.cart-total-quantity-footer {
   width: 100px;
 
 }

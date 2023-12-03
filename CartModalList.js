@@ -7,8 +7,7 @@ class CartModalList {
     this.render();
   }
 
-  createCartItems(products) {
-    const cartItems = [];
+  createProductMap(products) {
     const productMap = new Map();
 
     products.forEach(product => {
@@ -22,16 +21,28 @@ class CartModalList {
       }
     });
 
+    return productMap;
+  }
+
+  buildCartItems(productMap, context) {
+    const cartItems = [];
+
     productMap.forEach(product => {
-      const existingCartItem = this.findCartItemById(product.id);
+      const existingCartItem = this.findCartItemById(product.id, context);
       if (existingCartItem) {
-        existingCartItem.updateQuantity(product.quantity);
+        existingCartItem.this.updateQuantity(product.quantity);
         cartItems.push(existingCartItem);
       } else {
-        cartItems.push(new CartModalItem(product, this));
+        cartItems.push(new CartModalItem(product, context));
       }
     });
 
+    return cartItems;
+  }
+
+  createCartItems(products) {
+    const productMap = this.createProductMap(products);
+    const cartItems = this.buildCartItems(productMap, this);
     return cartItems;
   }
 
@@ -68,9 +79,7 @@ class CartModalList {
   }
 
   createFooterElement(items) {
-    const {quantity, sum}  = this.calculateCartResults(items)
-    console.log('sum: ', sum);
-    console.log('quantity: ', quantity);
+    const { quantity, sum } = this.calculateCartResults(items);
     const footerElement = document.createElement('div');
     footerElement.className = 'cart-item cart-item-footer';
 
@@ -79,26 +88,33 @@ class CartModalList {
     titleFooter.textContent = 'Всього';
     footerElement.appendChild(titleFooter);
 
-    const quantityFooter = document.createElement('div');
+    const quantityFooter = document.createElement('p');
     quantityFooter.textContent = quantity;
-    quantityFooter.className = 'cart-quantity-wrap';
+    quantityFooter.className = 'cart-quantity-wrap-footer';
     footerElement.appendChild(quantityFooter);
 
-    const totalCostFooter = document.createElement('div');
-    totalCostFooter.textContent = '₴ ' + sum  + '.00';
-    totalCostFooter.className = 'cart-total-quantity';
+    const totalCostFooter = document.createElement('p');
+    totalCostFooter.textContent = '₴ ' + sum + '.00';
+    totalCostFooter.className = 'cart-total-quantity-footer';
     footerElement.appendChild(totalCostFooter);
 
     return footerElement;
   }
-
 
   calculateCartResults(items) {
     const sum = items.reduce((accumulator, item) => {
       return accumulator + item.price;
     }, 0);
     const quantity = items.length;
-    return {quantity, sum}
+    return { quantity, sum };
+  }
+
+  updateCartResults(items) {
+    const { quantity, sum } = this.calculateCartResults(items);
+    const quantityEl = document.querySelector('.cart-quantity-wrap-footer');
+    const sumEl = document.querySelector('.cart-total-quantity-footer');
+    quantityEl.textContent = quantity;
+    sumEl.textContent = '₴ ' + sum + '.00';
   }
 
   findCartItemById(id) {
@@ -123,27 +139,39 @@ class CartModalList {
     }
   }
 
-  render() {
-    const cartContainer = document.querySelector('.cart-display');
+  renderHeader(cartContainer) {
     const headerElement = cartContainer.querySelector('.cart-item-header');
-    const footerElement = cartContainer.querySelector('.cart-item-footer');
-
     if (!headerElement && store.cart.goodsInCart.length) {
       const newHeaderElement = this.createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
-   
+  }
 
-    this.cartItems.forEach(cartItem => {
-      if (cartItem.product.quantity) {
-        const cartItemElement = cartItem.render();
-        cartContainer.appendChild(cartItemElement);
-      }
-    });
+  renderFooter(cartContainer) {
+    const footerElement = cartContainer.querySelector('.cart-item-footer');
     if (!footerElement && store.cart.goodsInCart.length) {
       const newFooterElement = this.createFooterElement(store.cart.goodsInCart);
       cartContainer.appendChild(newFooterElement);
     }
+  }
+
+  renderCartItems(cartContainer) {
+    const fragment = document.createDocumentFragment();
+    this.cartItems.forEach(cartItem => {
+      if (cartItem.product.quantity) {
+        const cartItemElement = cartItem.render();
+        fragment.appendChild(cartItemElement);
+      }
+    });
+
+    cartContainer.appendChild(fragment);
+  }
+
+  render() {
+    const cartContainer = document.querySelector('.cart-display');
+    this.renderHeader(cartContainer);
+    this.renderCartItems(cartContainer);
+    this.renderFooter(cartContainer);
   }
 }
 
