@@ -191,9 +191,14 @@ ________________________
     position: relative;
   display: flex;
   padding-bottom: 20px;
-  border-bottom: 1px solid black;
+  
   justify-content: space-between;
 }
+
+.cart-item:not(:last-child) {
+  border-bottom: 1px solid black;
+}
+
 
 .cart-image {
   max-width: 100%;
@@ -205,6 +210,19 @@ ________________________
   font-size: 20px;
   width: 150px;
 }
+
+.cart-title-footer {
+   font-weight: 700;
+   font-size: 24px;
+   width: 410px;
+}
+
+.cart-item-footer {
+   background-color: beige;
+   padding-top: 20px;
+   padding-left: 20px;
+}
+
 
 .cart-quantity-wrap {
   width: 100px;

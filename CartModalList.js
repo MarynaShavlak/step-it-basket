@@ -47,7 +47,6 @@ class CartModalList {
     const titleHeader = document.createElement('h4');
     titleHeader.className = 'cart-title';
     titleHeader.textContent = 'Назва';
-    titleHeader.className = 'cart-title';
     headerElement.appendChild(titleHeader);
 
     const priceHeader = document.createElement('div');
@@ -66,6 +65,40 @@ class CartModalList {
     headerElement.appendChild(totalCostHeader);
 
     return headerElement;
+  }
+
+  createFooterElement(items) {
+    const {quantity, sum}  = this.calculateCartResults(items)
+    console.log('sum: ', sum);
+    console.log('quantity: ', quantity);
+    const footerElement = document.createElement('div');
+    footerElement.className = 'cart-item cart-item-footer';
+
+    const titleFooter = document.createElement('p');
+    titleFooter.className = 'cart-title-footer';
+    titleFooter.textContent = 'Всього';
+    footerElement.appendChild(titleFooter);
+
+    const quantityFooter = document.createElement('div');
+    quantityFooter.textContent = quantity;
+    quantityFooter.className = 'cart-quantity-wrap';
+    footerElement.appendChild(quantityFooter);
+
+    const totalCostFooter = document.createElement('div');
+    totalCostFooter.textContent = '₴ ' + sum  + '.00';
+    totalCostFooter.className = 'cart-total-quantity';
+    footerElement.appendChild(totalCostFooter);
+
+    return footerElement;
+  }
+
+
+  calculateCartResults(items) {
+    const sum = items.reduce((accumulator, item) => {
+      return accumulator + item.price;
+    }, 0);
+    const quantity = items.length;
+    return {quantity, sum}
   }
 
   findCartItemById(id) {
@@ -93,17 +126,24 @@ class CartModalList {
   render() {
     const cartContainer = document.querySelector('.cart-display');
     const headerElement = cartContainer.querySelector('.cart-item-header');
+    const footerElement = cartContainer.querySelector('.cart-item-footer');
 
     if (!headerElement && store.cart.goodsInCart.length) {
       const newHeaderElement = this.createHeaderElement();
       cartContainer.appendChild(newHeaderElement);
     }
+   
+
     this.cartItems.forEach(cartItem => {
       if (cartItem.product.quantity) {
         const cartItemElement = cartItem.render();
         cartContainer.appendChild(cartItemElement);
       }
     });
+    if (!footerElement && store.cart.goodsInCart.length) {
+      const newFooterElement = this.createFooterElement(store.cart.goodsInCart);
+      cartContainer.appendChild(newFooterElement);
+    }
   }
 }
 
