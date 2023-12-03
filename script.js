@@ -1,5 +1,5 @@
 import Store from './Store.js';
-import Modal from './Modal.js';
+import Modal from './Modaldddd.js';
 import ProductList from './ProductList.js';
 import CartTablo from './CartTablo.js';
 
